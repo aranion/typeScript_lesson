@@ -1,0 +1,24 @@
+{
+  "name": "lesson",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc src/index.ts --outDir dist --target es2015",
+    "start": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aranion/typeScript_lesson.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/aranion/typeScript_lesson/issues"
+  },
+  "homepage": "https://github.com/aranion/typeScript_lesson#readme",
+  "devDependencies": {
+    "typescript": "^4.4.4"
+  }
+}
