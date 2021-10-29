@@ -1,6 +1,6 @@
 import { renderBlock } from './lib.js';
 
-export function renderUserBlock(userName: string, urlAvatar: string, favoriteItemsAmount: number) {
+export function renderUserBlock(userName: string, urlAvatar: string, favoriteItemsAmount?: number) {
   const favoritesCaption = favoriteItemsAmount
     ? favoriteItemsAmount
     : 'ничего нет';
@@ -22,3 +22,19 @@ export function renderUserBlock(userName: string, urlAvatar: string, favoriteIte
     `
   );
 }
+
+type userType = {
+  username: string
+  avatarUrl: string
+};
+type favoritesAmountType = {
+  favoriteItemsAmount: number
+};
+
+function getUserData(): unknown {
+  return localStorage.getItem('user');
+};
+
+function getFavoritesAmount(): unknown {
+  return localStorage.getItem('favoritesAmount');
+};

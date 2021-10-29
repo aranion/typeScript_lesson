@@ -20,15 +20,53 @@ export function renderSearchFormBlock(dateBegin?: string, dateFinish?: string) {
   const defaultDateBegin = dateBegin ? formatDate(dateBegin) : calcDate(0, 0, 1);
   const defaultDateFinish = dateFinish ? formatDate(dateFinish) : calcDate(0, 0, 3);
 
+  window.addEventListener('load', () => {
+    const searchForm = document.forms.namedItem('searchForm');
+
+    interface SearchFormData {
+      city: string,
+      checkInDate: string,
+      checkOutDate: string,
+      maxPrice: number
+    }
+
+    searchForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      console.log('submit');
+      searchFormData(search());
+    })
+
+    function search(): SearchFormData {
+      const data = {
+        city: null,
+        checkInDate: null,
+        checkOutDate: null,
+        maxPrice: null,
+      };
+      const formData = new FormData(searchForm);
+      data.city = formData.get('city');
+      data.checkInDate = formData.get('checkin');
+      data.checkOutDate = formData.get('checkout');
+      data.maxPrice = +formData.get('price');
+
+      return data;
+    };
+
+    function searchFormData(data: SearchFormData): void {
+      console.log(data);
+      // throw 1;
+    }
+  });
+
   renderBlock(
     'search-form-block',
     `
-    <form>
+    <form name="searchForm" id="searchForm">
       <fieldset class="search-filedset">
         <div class="row">
           <div>
             <label for="city">Город</label>
-            <input id="city" type="text" disabled value="Санкт-Петербург" />
+            <input id="city" type="text" name="city" value="Санкт-Петербург" />
             <input type="hidden" disabled value="59.9386,30.3141" />
           </div>
           <!--<div class="providers">
@@ -47,7 +85,7 @@ export function renderSearchFormBlock(dateBegin?: string, dateFinish?: string) {
           </div>
           <div>
             <label for="max-price">Макс. цена суток</label>
-            <input id="max-price" type="text" value="" name="price" class="max-price" />
+            <input id="max-price" type="number" value="100" name="price" class="max-price" />
           </div>
           <div>
             <div><button>Найти</button></div>
