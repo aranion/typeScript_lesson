@@ -15,7 +15,7 @@ export function renderUserBlock(userName: string, urlAvatar: string, favoriteIte
           <p class="name">${userName}</p>
           <p class="fav">
             <i class="heart-icon${hasFavoriteItems ? ' active' : ''
-    }"></i>${hasFavoriteItems ? favoritesCaption : 'ничего нет...'}
+}"></i>${hasFavoriteItems ? favoritesCaption : 'ничего нет...'}
           </p>
       </div>
     </div>
@@ -23,18 +23,4 @@ export function renderUserBlock(userName: string, urlAvatar: string, favoriteIte
   );
 }
 
-type userType = {
-  username: string
-  avatarUrl: string
-};
-type favoritesAmountType = {
-  favoriteItemsAmount: number
-};
 
-function getUserData(): unknown {
-  return localStorage.getItem('user');
-};
-
-function getFavoritesAmount(): unknown {
-  return localStorage.getItem('favoritesAmount');
-};

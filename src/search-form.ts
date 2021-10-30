@@ -23,39 +23,58 @@ export function renderSearchFormBlock(dateBegin?: string, dateFinish?: string) {
   window.addEventListener('load', () => {
     const searchForm = document.forms.namedItem('searchForm');
 
+    enum Genre {
+      city,
+      checkin,
+      checkout,
+      price
+    };
     interface SearchFormData {
-      city: string,
-      checkInDate: string,
-      checkOutDate: string,
-      maxPrice: number
+      city: string;
+      checkin: string;
+      checkout: string;
+      price: number;
+    };
+    interface Place { };
+
+    function search(e, fnCollBack): void {
+      e.preventDefault();
+
+      const data: SearchFormData = {
+        city: null,
+        checkin: null,
+        checkout: null,
+        price: null,
+      };
+
+      const formData = new FormData(searchForm);
+
+      for (const key in Genre) {
+        if (isNaN(+key)) {
+          data[key] = formData.get(key);
+          if (key === 'price') data[key] = +data[key];
+        }
+      }
+
+      searchFormData(data);
+
+      setTimeout(() => console.log(fnCollBack()), 1000);
     }
 
-    searchForm.addEventListener('submit', (e) => {
-      e.preventDefault();
-      console.log('submit');
-      searchFormData(search());
-    })
-
-    function search(): SearchFormData {
-      const data = {
-        city: null,
-        checkInDate: null,
-        checkOutDate: null,
-        maxPrice: null,
-      };
-      const formData = new FormData(searchForm);
-      data.city = formData.get('city');
-      data.checkInDate = formData.get('checkin');
-      data.checkOutDate = formData.get('checkout');
-      data.maxPrice = +formData.get('price');
-
-      return data;
-    };
-
-    function searchFormData(data: SearchFormData): void {
+    function searchFormData(data): void { //:never {
       console.log(data);
       // throw 1;
     }
+    function randomSearchData(): Place | ErrorCallback {
+      let res: Error | object[];
+      const rand = +Math.random().toFixed(2);
+
+      if (rand >= 0.5) res = [({} as Place)];
+      else res = new Error('error -  randomSearchData()');
+
+      return res;
+    };
+    searchForm.addEventListener('submit', (e) => search(e, randomSearchData));
   });
 
   renderBlock(
