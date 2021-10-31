@@ -1,8 +1,15 @@
-import { renderBlock } from './lib.js';
+import { Place, SearchFormData } from './interface.js';
+import { renderBlock, renderToast } from './lib.js';
+import { renderEmptyOrErrorSearchBlock, renderSearchResultsBlock } from './search-results.js';
 
-export function renderSearchFormBlock(dateBegin?: string, dateFinish?: string) {
+const URL_API = 'http://localhost:3000/places';
+const timerName: Array<number> = [];
+
+export function renderSearchFormBlock(dateBegin?: string, dateFinish?: string): void {
+
   function calcDate(y: number, m: number, d: number): string {
     const currentTime = new Date();
+
     return formatDate(
       new Date(
         currentTime.getFullYear() + y,
@@ -11,6 +18,7 @@ export function renderSearchFormBlock(dateBegin?: string, dateFinish?: string) {
       )
         .toLocaleDateString());
   }
+
   function formatDate(date: string): string {
     return date.split('.').reverse().join('-');
   }
@@ -22,20 +30,14 @@ export function renderSearchFormBlock(dateBegin?: string, dateFinish?: string) {
 
   window.addEventListener('load', () => {
     const searchForm = document.forms.namedItem('searchForm');
+    searchForm.addEventListener('change', resetForm);
 
     enum Genre {
       city,
       checkin,
       checkout,
       price
-    };
-    interface SearchFormData {
-      city: string;
-      checkin: string;
-      checkout: string;
-      price: number;
-    };
-    interface Place { };
+    }
 
     function search(e, fnCollBack): void {
       e.preventDefault();
@@ -47,7 +49,7 @@ export function renderSearchFormBlock(dateBegin?: string, dateFinish?: string) {
         price: null,
       };
 
-      const formData = new FormData(searchForm);
+      const formData: FormData = new FormData(searchForm);
 
       for (const key in Genre) {
         if (isNaN(+key)) {
@@ -57,25 +59,72 @@ export function renderSearchFormBlock(dateBegin?: string, dateFinish?: string) {
       }
 
       searchFormData(data);
-
-      setTimeout(() => console.log(fnCollBack()), 1000);
+      fnCollBack();
     }
 
-    function searchFormData(data): void { //:never {
-      console.log(data);
-      // throw 1;
+    async function searchFormData(searchData: SearchFormData): Promise<void> {
+      await fetchDataAPI()
+        .then((res: Place[]) => {
+          const result: Place[] = [];
+
+          for (const key in res) {
+            if (Object.prototype.hasOwnProperty.call(res, key)) {
+              const el = res[key];
+
+              if (el.price <= searchData.price) result.push(res[key]);
+            }
+          }
+          if (Object.keys(result).length === 0) {
+            renderEmptyOrErrorSearchBlock('Нет результатов удовлетворяющих данному запросу.');
+          } else {
+            renderSearchResultsBlock(result);
+          }
+        })
+        .catch((err: Error) => console.log(err));
     }
-    function randomSearchData(): Place | ErrorCallback {
-      let res: Error | object[];
-      const rand = +Math.random().toFixed(2);
 
-      if (rand >= 0.5) res = [({} as Place)];
-      else res = new Error('error -  randomSearchData()');
+    async function fetchDataAPI(): Promise<Array<Place> | Error> {
+      const response = await fetch(URL_API);
 
-      return res;
-    };
-    searchForm.addEventListener('submit', (e) => search(e, randomSearchData));
+      if (!response.ok) {
+        return new Error("Ошибка HTTP: " + response.status);
+      }
+      return await response.json();
+    }
+
+    searchForm.addEventListener('submit', (e) => search(e, resetForm));
   });
+
+  function resetForm(): void {
+    const elemNodeResultsBlock: Element = document.querySelector('.results-list');
+    const elemNodeFiledset: Element = document.querySelector('.search-filedset');
+
+    function disabledButton(elements: Element): void {
+      elements.querySelectorAll('button').forEach(el => el.disabled = true);
+    }
+
+    timerName.forEach((item: number) => clearInterval(item));
+
+    const timer = setTimeout(() => {
+      elemNodeResultsBlock !== null ? disabledButton(elemNodeResultsBlock) : '';
+      disabledButton(elemNodeFiledset);
+
+      renderToast(
+        {
+          text: 'Необходимо обновить данные формы!',
+          type: 'success',
+        },
+        {
+          name: 'Обновить',
+          handler: () => {
+            location.reload();
+          },
+        }
+      );
+    }, 300000);
+
+    timerName.push(timer);
+  }
 
   renderBlock(
     'search-form-block',
@@ -104,7 +153,7 @@ export function renderSearchFormBlock(dateBegin?: string, dateFinish?: string) {
           </div>
           <div>
             <label for="max-price">Макс. цена суток</label>
-            <input id="max-price" type="number" value="100" name="price" class="max-price" />
+            <input id="max-price" type="number" value="6000" name="price" class="max-price" />
           </div>
           <div>
             <div><button>Найти</button></div>
@@ -115,3 +164,4 @@ export function renderSearchFormBlock(dateBegin?: string, dateFinish?: string) {
     `
   );
 }
+

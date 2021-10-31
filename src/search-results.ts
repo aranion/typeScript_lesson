@@ -1,4 +1,9 @@
-import { renderBlock } from './lib.js';
+import { getFavoritesAmount, getUserData, setLocalStorage } from './index.js';
+import { favoritesAmountType, Place, PlaceEdit, userType } from './interface.js';
+import { renderBlock, renderToast } from './lib.js';
+import { renderUserBlock } from './user.js';
+
+const URL_POST_RESERVATION_API = 'http://localhost:3000/reservationAPI';
 
 export function renderSearchStubBlock() {
   renderBlock(
@@ -24,7 +29,113 @@ export function renderEmptyOrErrorSearchBlock(reasonMessage) {
   );
 }
 
-export function renderSearchResultsBlock() {
+function toggleFavoriteItem(e: Event): void {
+  const KEY_LOCAL_STORAGE: string = 'favoriteItems';
+
+  const el = e.target as HTMLElement;
+  const parenNode: HTMLElement = el.parentNode.parentElement;
+  const dataParse: Array<PlaceEdit | null> = JSON.parse(localStorage.getItem(KEY_LOCAL_STORAGE));
+  const findIndex: number = dataParse.findIndex(item => +item.id === +el.dataset.id);
+
+  if (dataParse.length === 0 || findIndex === -1) {
+    const id: number = +el.dataset.id;
+    const name: string = parenNode.querySelector('.result-info--header').querySelector('p').textContent;
+    const image: string = parenNode.querySelector('.result-img').getAttribute('src');
+
+    dataParse.push({ id, name, image });
+  } else {
+    dataParse.splice(findIndex, 1);
+  }
+
+  setLocalStorage(KEY_LOCAL_STORAGE, dataParse);
+  setLocalStorage('favoritesAmount', { favoritesAmount: calcFavoritesAmount() });
+
+  renderUserBlock(
+    (getUserData() as userType).username,
+    (getUserData() as userType).avatarUrl,
+    (getFavoritesAmount() as favoritesAmountType).favoritesAmount
+  );
+  el.classList.toggle('active');
+}
+
+function checkStyleFavoriteItem(el: HTMLElement): void {
+  const KEY_LOCAL_STORAGE: string = 'favoriteItems';
+
+  const dataParse: Array<PlaceEdit | null> = JSON.parse(localStorage.getItem(KEY_LOCAL_STORAGE));
+
+  if (dataParse.findIndex(item => +item.id === +el.dataset.id) !== -1) {
+    el.classList.add('active');
+  }
+}
+
+export function calcFavoritesAmount(): number {
+  return JSON.parse(localStorage.getItem('favoriteItems')).length;
+}
+
+async function fetchReservationData(e: MouseEvent): Promise<void | Error> {
+  try {
+    const response = await fetch(URL_POST_RESERVATION_API);
+
+    if (response.ok) {
+      renderToast(
+        {
+          text: 'Данные о бронировании успешно отправлены на сервер!',
+          type: 'success',
+        },
+        {
+          name: 'Закрыть',
+          handler: () => { },
+        }
+      );
+    } else {
+      renderToast(
+        {
+          text: "Ошибка HTTP: " + response.status + ". Cервер не может обработать запрос.",
+          type: 'success',
+        },
+        {
+          name: 'Закрыть',
+          handler: () => { },
+        }
+      );
+    }
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+export function renderSearchResultsBlock(data: Array<Place>) {
+  const renderList: Array<string> = [];
+
+  for (const key in data) {
+    if (Object.prototype.hasOwnProperty.call(data, key)) {
+      const el = data[key];
+
+      renderList.push(`
+        <li class="result">
+          <div class="result-container">
+            <div class="result-img-container">
+              <div class="favorites" data-id="${el.id}"></div>
+              <img class="result-img" src="${el.image}" alt="${el.name}">
+            </div>
+            <div class="result-info">
+              <div class="result-info--header">
+                <p>${el.name}</p>
+                <p class="price">${el.price}&#8381;</p>
+              </div>
+              <div class="result-info--map"><i class="map-icon"></i>${el.remoteness}км от вас</div>
+              <div class="result-info--descr">${el.description}</div>
+              <div class="result-info--footer">
+                <div>
+                  <button>Забронировать</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </li>`);
+    }
+  }
+
   renderBlock(
     'search-results-block',
     `
@@ -40,49 +151,16 @@ export function renderSearchResultsBlock() {
         </div>
     </div>
     <ul class="results-list">
-      <li class="result">
-        <div class="result-container">
-          <div class="result-img-container">
-            <div class="favorites active"></div>
-            <img class="result-img" src="./img/result-1.png" alt="">
-          </div>	
-          <div class="result-info">
-            <div class="result-info--header">
-              <p>YARD Residence Apart-hotel</p>
-              <p class="price">13000&#8381;</p>
-            </div>
-            <div class="result-info--map"><i class="map-icon"></i> 2.5км от вас</div>
-            <div class="result-info--descr">Комфортный апарт-отель в самом сердце Санкт-Петербрга. К услугам гостей номера с видом на город и бесплатный Wi-Fi.</div>
-            <div class="result-info--footer">
-              <div>
-                <button>Забронировать</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </li>
-      <li class="result">
-        <div class="result-container">
-          <div class="result-img-container">
-            <div class="favorites"></div>
-            <img class="result-img" src="./img/result-2.png" alt="">
-          </div>	
-          <div class="result-info">
-            <div class="result-info--header">
-              <p>Akyan St.Petersburg</p>
-              <p class="price">13000&#8381;</p>
-            </div>
-            <div class="result-info--map"><i class="map-icon"></i> 1.1км от вас</div>
-            <div class="result-info--descr">Отель Akyan St-Petersburg с бесплатным Wi-Fi на всей территории расположен в историческом здании Санкт-Петербурга.</div>
-            <div class="result-info--footer">
-              <div>
-                <button>Забронировать</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </li>
+      ${renderList.join('')}
     </ul>
     `
   );
+
+  Array.from(document.querySelectorAll('.favorites')).map((el: HTMLElement) => {
+    el.addEventListener('click', (e) => toggleFavoriteItem(e));
+    checkStyleFavoriteItem(el);
+  });
+  Array.from(document.querySelector('.results-list').querySelectorAll('button')).map((el: HTMLElement) => {
+    el.addEventListener('click', (e) => fetchReservationData(e));
+  })
 }
