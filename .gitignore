@@ -1,5 +1,6 @@
 node_modules
 public/scripts
+src/typescript_flatrent_sdk
 /lesson_*
 
 .editorconfig

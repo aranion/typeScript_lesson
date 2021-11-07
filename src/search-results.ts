@@ -34,7 +34,7 @@ function toggleFavoriteItem(e: Event): void {
 
   const el = e.target as HTMLElement;
   const parenNode: HTMLElement = el.parentNode.parentElement;
-  const dataParse: Array<PlaceEdit | null> = JSON.parse(localStorage.getItem(KEY_LOCAL_STORAGE));
+  const dataParse: Array<PlaceEdit> | null = JSON.parse(localStorage.getItem(KEY_LOCAL_STORAGE));
   const findIndex: number = dataParse.findIndex(item => +item.id === +el.dataset.id);
 
   if (dataParse.length === 0 || findIndex === -1) {
@@ -61,7 +61,7 @@ function toggleFavoriteItem(e: Event): void {
 function checkStyleFavoriteItem(el: HTMLElement): void {
   const KEY_LOCAL_STORAGE: string = 'favoriteItems';
 
-  const dataParse: Array<PlaceEdit | null> = JSON.parse(localStorage.getItem(KEY_LOCAL_STORAGE));
+  const dataParse: Array<PlaceEdit> | null = JSON.parse(localStorage.getItem(KEY_LOCAL_STORAGE));
 
   if (dataParse.findIndex(item => +item.id === +el.dataset.id) !== -1) {
     el.classList.add('active');
