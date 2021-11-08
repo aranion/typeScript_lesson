@@ -1,6 +1,6 @@
 import { Place, SearchFormData } from './interface.js';
 import { renderBlock, renderToast } from './lib.js';
-import { renderEmptyOrErrorSearchBlock, renderSearchResultsBlock } from './search-results.js';
+import { renderEmptyOrErrorSearchBlock, showSearchResultsBlock } from './search-results.js';
 
 const URL_API = 'http://localhost:3000/places';
 const timerName: Array<number> = [];
@@ -77,7 +77,7 @@ export function renderSearchFormBlock(dateBegin?: string, dateFinish?: string): 
           if (Object.keys(result).length === 0) {
             renderEmptyOrErrorSearchBlock('Нет результатов удовлетворяющих данному запросу.');
           } else {
-            renderSearchResultsBlock(result);
+            showSearchResultsBlock(result);
           }
         })
         .catch((err: Error) => console.log(err));

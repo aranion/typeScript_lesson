@@ -22,7 +22,12 @@ sdk.get('mvm32l')
   .then((flat) => {
     console.log('flat by id', flat)
   });
-sdk.search({ city: 'Санкт-Петербург' })
+sdk.search({
+  city: 'Санкт-Петербург',
+  checkInDate: cloneDate(today),
+  checkOutDate: addDays(cloneDate(today), 1),
+  priceLimit: 4500
+})
   .catch((result) => {
     console.error('serach without dates', result)
   })

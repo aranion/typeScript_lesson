@@ -41,7 +41,7 @@ function toggleFavoriteItem(e: Event): void {
     const id: number = +el.dataset.id;
     const name: string = parenNode.querySelector('.result-info--header').querySelector('p').textContent;
     const image: string = parenNode.querySelector('.result-img').getAttribute('src');
-
+    
     dataParse.push({ id, name, image });
   } else {
     dataParse.splice(findIndex, 1);
@@ -72,7 +72,7 @@ export function calcFavoritesAmount(): number {
   return JSON.parse(localStorage.getItem('favoriteItems')).length;
 }
 
-async function fetchReservationData(e: MouseEvent): Promise<void | Error> {
+async function renderResultReservationData(e: MouseEvent): Promise<void | Error> {
   try {
     const response = await fetch(URL_POST_RESERVATION_API);
 
@@ -100,11 +100,20 @@ async function fetchReservationData(e: MouseEvent): Promise<void | Error> {
       );
     }
   } catch (error) {
-    console.log(error);
+    renderToast(
+      {
+        text: "Ошибка " + error + ".",
+        type: 'success',
+      },
+      {
+        name: 'Закрыть',
+        handler: () => { },
+      }
+    );
   }
 }
 
-export function renderSearchResultsBlock(data: Array<Place>) {
+export function showSearchResultsBlock(data: Array<Place>) {
   const renderList: Array<string> = [];
 
   for (const key in data) {
@@ -161,6 +170,6 @@ export function renderSearchResultsBlock(data: Array<Place>) {
     checkStyleFavoriteItem(el);
   });
   Array.from(document.querySelector('.results-list').querySelectorAll('button')).map((el: HTMLElement) => {
-    el.addEventListener('click', (e) => fetchReservationData(e));
+    el.addEventListener('click', (e) => renderResultReservationData(e));
   })
 }
