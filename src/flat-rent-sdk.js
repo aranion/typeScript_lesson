@@ -114,7 +114,6 @@ export class FlatRentSdk {
             `Passed invalid price limit - "${parameters.priceLimit}".`
           );
         }
-
         let flats = this.database;
 
         if (parameters.priceLimit != null) {

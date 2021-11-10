@@ -41,7 +41,7 @@ function toggleFavoriteItem(e: Event): void {
     const id: number = +el.dataset.id;
     const name: string = parenNode.querySelector('.result-info--header').querySelector('p').textContent;
     const image: string = parenNode.querySelector('.result-img').getAttribute('src');
-    
+
     dataParse.push({ id, name, image });
   } else {
     dataParse.splice(findIndex, 1);
@@ -56,6 +56,34 @@ function toggleFavoriteItem(e: Event): void {
     (getFavoritesAmount() as favoritesAmountType).favoritesAmount
   );
   el.classList.toggle('active');
+}
+
+function sortByPriceMax(one: Place, two: Place): 1 | -1 | 0 {
+  if (one.price > two.price) {
+    return 1
+  } else if (one.price < two.price) {
+    return -1
+  } else {
+    return 0
+  }
+}
+function sortByPriceMin(one: Place, two: Place): 1 | -1 | 0 {
+  if (one.price > two.price) {
+    return -1
+  } else if (one.price < two.price) {
+    return 1
+  } else {
+    return 0
+  }
+}
+function sortByRemoteness(one: Place, two: Place): 1 | -1 | 0 {
+  if (one.remoteness > two.remoteness) {
+    return 1
+  } else if (one.remoteness < two.remoteness) {
+    return -1
+  } else {
+    return 0
+  }
 }
 
 function checkStyleFavoriteItem(el: HTMLElement): void {
@@ -115,6 +143,15 @@ async function renderResultReservationData(e: MouseEvent): Promise<void | Error>
 
 export function showSearchResultsBlock(data: Array<Place>) {
   const renderList: Array<string> = [];
+  const selectSort: number = document.querySelector('.search-results-filter')?.querySelector('select').selectedIndex;
+
+  if (selectSort === 0) {
+    data.sort(sortByPriceMax);
+  } else if (selectSort === 1) {
+    data.sort(sortByPriceMin);
+  } else if (selectSort === 2) {
+    data.sort(sortByRemoteness);
+  }
 
   for (const key in data) {
     if (Object.prototype.hasOwnProperty.call(data, key)) {
@@ -153,8 +190,8 @@ export function showSearchResultsBlock(data: Array<Place>) {
         <div class="search-results-filter">
             <span><i class="icon icon-filter"></i> Сортировать:</span>
             <select>
-                <option selected="">Сначала дешёвые</option>
-                <option selected="">Сначала дорогие</option>
+                <option>Сначала дешёвые</option>
+                <option>Сначала дорогие</option>
                 <option>Сначала ближе</option>
             </select>
         </div>
@@ -171,5 +208,5 @@ export function showSearchResultsBlock(data: Array<Place>) {
   });
   Array.from(document.querySelector('.results-list').querySelectorAll('button')).map((el: HTMLElement) => {
     el.addEventListener('click', (e) => renderResultReservationData(e));
-  })
+  });
 }

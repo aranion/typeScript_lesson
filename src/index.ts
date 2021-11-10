@@ -18,16 +18,17 @@ export function getFavoritesAmount(): unknown {
 
 const sdk = new FlatRentSdk();
 const today = new Date();
-sdk.get('mvm32l')
-  .then((flat) => {
-    console.log('flat by id', flat)
-  });
+// sdk.get('mvm32l')
+//   .then((flat) => {
+//     console.log('flat by id', flat)
+//   });
 sdk.search({
   city: 'Санкт-Петербург',
   checkInDate: cloneDate(today),
   checkOutDate: addDays(cloneDate(today), 1),
-  priceLimit: 4500
+  priceLimit: 15000
 })
+  .then(res => console.log(res))
   .catch((result) => {
     console.error('serach without dates', result)
   })
