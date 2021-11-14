@@ -56,7 +56,7 @@ export function renderSearchFormBlock(dateBegin?: string, dateFinish?: string): 
         // if (isNaN(+key)) {
         data = { ...data, [key]: formData.get(key) };
         // data[key] = formData.get(key);
-          if (key === 'price') data[key] = +data[key];
+        if (key === 'price') data[key] = +data[key];
         // }
       }
 
@@ -88,7 +88,7 @@ export function renderSearchFormBlock(dateBegin?: string, dateFinish?: string): 
       const response = await fetch(URL_API);
 
       if (!response.ok) {
-        return new Error("Ошибка HTTP: " + response.status);
+        return new Error('Ошибка HTTP: ' + response.status);
       }
       return await response.json();
     }

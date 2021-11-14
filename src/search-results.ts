@@ -30,7 +30,7 @@ export function renderEmptyOrErrorSearchBlock(reasonMessage: string) {
 }
 
 function toggleFavoriteItem(e: Event): void {
-  const KEY_LOCAL_STORAGE: string = 'favoriteItems';
+  const KEY_LOCAL_STORAGE = 'favoriteItems';
   const el = e.target as HTMLElement;
 
   if (el.parentNode !== null && el.parentNode.parentElement !== null) {
@@ -43,7 +43,7 @@ function toggleFavoriteItem(e: Event): void {
     const findIndex: number = dataParse.findIndex(item => +item.id === Number(el.dataset['id']));
 
     if (dataParse.length === 0 || findIndex === -1) {
-      const id: number = Number(el.dataset['id']);
+      const id = Number(el.dataset['id']);
       const name: string = parenNode.querySelector('.result-info--header')?.querySelector('p')?.textContent || '';
       const image: string = parenNode.querySelector('.result-img')?.getAttribute('src') || '';
 
@@ -94,7 +94,7 @@ function sortByRemoteness(one: Place, two: Place): 1 | -1 | 0 {
 }
 
 function checkStyleFavoriteItem(el: HTMLElement): void {
-  const KEY_LOCAL_STORAGE: string = 'favoriteItems';
+  const KEY_LOCAL_STORAGE = 'favoriteItems';
 
   const dataParse: Array<PlaceEdit> | null = JSON.parse(localStorage.getItem(KEY_LOCAL_STORAGE) || '');
 
@@ -119,30 +119,32 @@ async function renderResultReservationData(): Promise<void | Error> {
         },
         {
           name: 'Закрыть',
-          handler: () => { },
+          handler: () => {
+            console.log('Закрыть');
+          },
         }
       );
     } else {
       renderToast(
         {
-          text: "Ошибка HTTP: " + response.status + ". Cервер не может обработать запрос.",
+          text: 'Ошибка HTTP: ' + response.status + '. Cервер не может обработать запрос.',
           type: 'success',
         },
         {
           name: 'Закрыть',
-          handler: () => { },
+          handler: () => { console.log('Закрыть'); },
         }
       );
     }
   } catch (error) {
     renderToast(
       {
-        text: "Ошибка " + error + ".",
+        text: 'Ошибка ' + error + '.',
         type: 'success',
       },
       {
         name: 'Закрыть',
-        handler: () => { },
+        handler: () => { console.log('Закрыть'); },
       }
     );
   }

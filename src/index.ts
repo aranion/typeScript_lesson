@@ -6,15 +6,15 @@ import { FlatRentSdk, addDays, cloneDate } from './flat-rent-sdk.js';
 
 export function setLocalStorage(key: string, data: object): void {
   localStorage.setItem(key, JSON.stringify(data));
-};
+}
 export function getUserData(): userType {
   const data = localStorage.getItem('user');
   return JSON.parse(data || '');
-};
+}
 export function getFavoritesAmount(): favoritesAmountType {
   const data = localStorage.getItem('favoritesAmount');
   return JSON.parse(data || '');
-};
+}
 
 const sdk = new FlatRentSdk();
 const today = new Date();

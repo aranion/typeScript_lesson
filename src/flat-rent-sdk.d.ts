@@ -24,8 +24,8 @@ export class FlatRentSdk {
   database: database;
 
   constructor()
-  get(id: string): Promise<Object | null>;
-  search(parameters: searchParameters): Promise<Object[] | Error>;
+  get(id: string): Promise<database>;
+  search(parameters: searchParameters): Promise<database[] | Error>;
   book(flatId: string, checkInDate: Date, checkOutDate: Date): number;
   _assertDatesAreCorrect(checkInDate: Date, checkOutDate: Date): void | Error;
   _resetTime(date: Date): void;
