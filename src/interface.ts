@@ -15,6 +15,14 @@ export interface Place {
   remoteness: number;
 };
 
+export interface MessageToast {
+  type: string;
+  text: string;
+}
+export interface Action {
+  name: string;
+  handler: CallableFunction
+}
 export interface PlaceEdit {
   id: number;
   image: string;
