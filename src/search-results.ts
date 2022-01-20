@@ -51,9 +51,9 @@ function toggleFavoriteItem(e: Event): void {
     } else {
       dataParse.splice(findIndex, 1);
     }
-
+    
     setLocalStorage(KEY_LOCAL_STORAGE, dataParse);
-    setLocalStorage('favoritesAmount', { favoritesAmount: calcFavoritesAmount() });
+    // setLocalStorage('favoritesAmount', { favoritesAmount: calcFavoritesAmount() });
 
     renderUserBlock(
       (getUserData() as userType).username,
@@ -104,7 +104,11 @@ function checkStyleFavoriteItem(el: HTMLElement): void {
 }
 
 export function calcFavoritesAmount(): number {
-  return JSON.parse(localStorage.getItem('favoriteItems') || '').length;
+  const data = localStorage.getItem('favoriteItems');
+  if (data) {
+    return JSON.parse(data || '').length;
+  }
+  return 0;
 }
 
 async function renderResultReservationData(): Promise<void | Error> {
