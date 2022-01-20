@@ -6,15 +6,15 @@ import { FlatRentSdk, addDays, cloneDate } from './flat-rent-sdk.js';
 
 export function setLocalStorage(key: string, data: object): void {
   localStorage.setItem(key, JSON.stringify(data));
-};
-// unknown - потому что такое было ДЗ из 1 урока
-export function getUserData(): unknown {
-  return JSON.parse(localStorage.getItem('user'));
-};
-// unknown - потому что такое было ДЗ из 1 урока
-export function getFavoritesAmount(): unknown {
-  return JSON.parse(localStorage.getItem('favoritesAmount'));
-};
+}
+export function getUserData(): userType {
+  const data = localStorage.getItem('user');
+  return JSON.parse(data || '');
+}
+export function getFavoritesAmount(): favoritesAmountType {
+  const data = localStorage.getItem('favoritesAmount');
+  return JSON.parse(data || '');
+}
 
 const sdk = new FlatRentSdk();
 const today = new Date();
@@ -36,11 +36,10 @@ sdk.search({
 window.addEventListener('DOMContentLoaded', () => {
   setLocalStorage('user', { username: 'Wade Warren', avatarUrl: '/img/avatar.png' });
   setLocalStorage('favoritesAmount', { favoritesAmount: calcFavoritesAmount() });
-
   renderUserBlock(
-    (getUserData() as userType).username,
-    (getUserData() as userType).avatarUrl,
-    (getFavoritesAmount() as favoritesAmountType).favoritesAmount
+    getUserData().username,
+    getUserData().avatarUrl,
+    getFavoritesAmount().favoritesAmount
   );
   renderSearchFormBlock();
   renderSearchStubBlock();

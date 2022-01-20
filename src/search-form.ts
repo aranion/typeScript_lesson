@@ -30,6 +30,8 @@ export function renderSearchFormBlock(dateBegin?: string, dateFinish?: string): 
 
   window.addEventListener('load', () => {
     const searchForm = document.forms.namedItem('searchForm');
+
+    if (searchForm === null) return;
     searchForm.addEventListener('change', resetForm);
 
     // enum Genre {
@@ -39,22 +41,22 @@ export function renderSearchFormBlock(dateBegin?: string, dateFinish?: string): 
     //   price
     // }
 
-    function search(e, fnCollBack): void {
+    function search(e: Event, fnCollBack: CallableFunction): void {
       e.preventDefault();
 
-      const data: SearchFormData = {
-        city: null,
-        checkin: null,
-        checkout: null,
-        price: null,
+      let data: SearchFormData = {
+        city: '',
+        checkin: '',
+        checkout: '',
+        price: 0,
       };
-
-      const formData: FormData = new FormData(searchForm);
-
+      if (searchForm === null) return;
+      const formData = new FormData(searchForm);
       for (const key in data) {
         // if (isNaN(+key)) {
-          data[key] = formData.get(key);
-          if (key === 'price') data[key] = +data[key];
+        data = { ...data, [key]: formData.get(key) };
+        // data[key] = formData.get(key);
+        if (key === 'price') data[key] = +data[key];
         // }
       }
 
@@ -64,14 +66,13 @@ export function renderSearchFormBlock(dateBegin?: string, dateFinish?: string): 
 
     async function searchFormData(searchData: SearchFormData): Promise<void> {
       await fetchDataAPI()
-        .then((res: Place[]) => {
+        .then((res) => {
           const result: Place[] = [];
 
           for (const key in res) {
             if (Object.prototype.hasOwnProperty.call(res, key)) {
-              const el = res[key];
-
-              if (el.price <= searchData.price) result.push(res[key]);
+              const el: Place = res[key as keyof typeof res];
+              if (el.price <= searchData.price) result.push(res[key as keyof typeof res]);
             }
           }
           if (Object.keys(result).length === 0) {
@@ -87,7 +88,7 @@ export function renderSearchFormBlock(dateBegin?: string, dateFinish?: string): 
       const response = await fetch(URL_API);
 
       if (!response.ok) {
-        return new Error("Ошибка HTTP: " + response.status);
+        return new Error('Ошибка HTTP: ' + response.status);
       }
       return await response.json();
     }
@@ -96,8 +97,8 @@ export function renderSearchFormBlock(dateBegin?: string, dateFinish?: string): 
   });
 
   function resetForm(): void {
-    const elemNodeResultsBlock: Element = document.querySelector('.results-list');
-    const elemNodeFiledset: Element = document.querySelector('.search-filedset');
+    const elemNodeResultsBlock: Element = document.querySelector('.results-list')!;
+    const elemNodeFiledset: Element = document.querySelector('.search-filedset')!;
 
     function disabledButton(elements: Element): void {
       elements.querySelectorAll('button').forEach(el => el.disabled = true);

@@ -1,9 +1,12 @@
-export function renderBlock(elementId, html) {
+import { MessageToast, Action } from './interface';
+
+export function renderBlock(elementId: string, html: string) {
   const element = document.getElementById(elementId);
+  if (element === null) return;
   element.innerHTML = html;
 }
 
-export function renderToast(message, action?) {
+export function renderToast(message: MessageToast | null, action?: Action) {
   let messageText = '';
 
   if (message != null) {

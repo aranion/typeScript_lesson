@@ -17,7 +17,7 @@ export function renderSearchStubBlock() {
   );
 }
 
-export function renderEmptyOrErrorSearchBlock(reasonMessage) {
+export function renderEmptyOrErrorSearchBlock(reasonMessage: string) {
   renderBlock(
     'search-results-block',
     `
@@ -30,32 +30,39 @@ export function renderEmptyOrErrorSearchBlock(reasonMessage) {
 }
 
 function toggleFavoriteItem(e: Event): void {
-  const KEY_LOCAL_STORAGE: string = 'favoriteItems';
-
+  const KEY_LOCAL_STORAGE = 'favoriteItems';
   const el = e.target as HTMLElement;
-  const parenNode: HTMLElement = el.parentNode.parentElement;
-  const dataParse: Array<PlaceEdit> | null = JSON.parse(localStorage.getItem(KEY_LOCAL_STORAGE));
-  const findIndex: number = dataParse.findIndex(item => +item.id === +el.dataset.id);
 
-  if (dataParse.length === 0 || findIndex === -1) {
-    const id: number = +el.dataset.id;
-    const name: string = parenNode.querySelector('.result-info--header').querySelector('p').textContent;
-    const image: string = parenNode.querySelector('.result-img').getAttribute('src');
+  if (el.parentNode !== null && el.parentNode.parentElement !== null) {
+    const parenNode: HTMLElement = el.parentNode.parentElement;
+    const itemLocalStorage = localStorage.getItem(KEY_LOCAL_STORAGE);
 
-    dataParse.push({ id, name, image });
-  } else {
-    dataParse.splice(findIndex, 1);
+    if (itemLocalStorage === null) return;
+    const dataParse: Array<PlaceEdit> = JSON.parse(itemLocalStorage);
+
+    const findIndex: number = dataParse.findIndex(item => +item.id === Number(el.dataset['id']));
+
+    if (dataParse.length === 0 || findIndex === -1) {
+      const id = Number(el.dataset['id']);
+      const name: string = parenNode.querySelector('.result-info--header')?.querySelector('p')?.textContent || '';
+      const image: string = parenNode.querySelector('.result-img')?.getAttribute('src') || '';
+
+      dataParse.push({ id, name, image });
+    } else {
+      dataParse.splice(findIndex, 1);
+    }
+
+    setLocalStorage(KEY_LOCAL_STORAGE, dataParse);
+    setLocalStorage('favoritesAmount', { favoritesAmount: calcFavoritesAmount() });
+
+    renderUserBlock(
+      (getUserData() as userType).username,
+      (getUserData() as userType).avatarUrl,
+      (getFavoritesAmount() as favoritesAmountType).favoritesAmount
+    );
+    el.classList.toggle('active');
   }
 
-  setLocalStorage(KEY_LOCAL_STORAGE, dataParse);
-  setLocalStorage('favoritesAmount', { favoritesAmount: calcFavoritesAmount() });
-
-  renderUserBlock(
-    (getUserData() as userType).username,
-    (getUserData() as userType).avatarUrl,
-    (getFavoritesAmount() as favoritesAmountType).favoritesAmount
-  );
-  el.classList.toggle('active');
 }
 
 function sortByPriceMax(one: Place, two: Place): 1 | -1 | 0 {
@@ -87,20 +94,20 @@ function sortByRemoteness(one: Place, two: Place): 1 | -1 | 0 {
 }
 
 function checkStyleFavoriteItem(el: HTMLElement): void {
-  const KEY_LOCAL_STORAGE: string = 'favoriteItems';
+  const KEY_LOCAL_STORAGE = 'favoriteItems';
 
-  const dataParse: Array<PlaceEdit> | null = JSON.parse(localStorage.getItem(KEY_LOCAL_STORAGE));
+  const dataParse: Array<PlaceEdit> | null = JSON.parse(localStorage.getItem(KEY_LOCAL_STORAGE) || '');
 
-  if (dataParse.findIndex(item => +item.id === +el.dataset.id) !== -1) {
+  if (dataParse !== null && dataParse.findIndex(item => +item.id === Number(el.dataset['id'])) !== -1) {
     el.classList.add('active');
   }
 }
 
 export function calcFavoritesAmount(): number {
-  return JSON.parse(localStorage.getItem('favoriteItems')).length;
+  return JSON.parse(localStorage.getItem('favoriteItems') || '').length;
 }
 
-async function renderResultReservationData(e: MouseEvent): Promise<void | Error> {
+async function renderResultReservationData(): Promise<void | Error> {
   try {
     const response = await fetch(URL_POST_RESERVATION_API);
 
@@ -112,30 +119,32 @@ async function renderResultReservationData(e: MouseEvent): Promise<void | Error>
         },
         {
           name: 'Закрыть',
-          handler: () => { },
+          handler: () => {
+            console.log('Закрыть');
+          },
         }
       );
     } else {
       renderToast(
         {
-          text: "Ошибка HTTP: " + response.status + ". Cервер не может обработать запрос.",
+          text: 'Ошибка HTTP: ' + response.status + '. Cервер не может обработать запрос.',
           type: 'success',
         },
         {
           name: 'Закрыть',
-          handler: () => { },
+          handler: () => { console.log('Закрыть'); },
         }
       );
     }
   } catch (error) {
     renderToast(
       {
-        text: "Ошибка " + error + ".",
+        text: 'Ошибка ' + error + '.',
         type: 'success',
       },
       {
         name: 'Закрыть',
-        handler: () => { },
+        handler: () => { console.log('Закрыть'); },
       }
     );
   }
@@ -143,7 +152,7 @@ async function renderResultReservationData(e: MouseEvent): Promise<void | Error>
 
 export function showSearchResultsBlock(data: Array<Place>) {
   const renderList: Array<string> = [];
-  const selectSort: number = document.querySelector('.search-results-filter')?.querySelector('select').selectedIndex;
+  const selectSort: number = document.querySelector('.search-results-filter')?.querySelector('select')?.selectedIndex || 0;
 
   if (selectSort === 0) {
     data.sort(sortByPriceMax);
@@ -156,6 +165,7 @@ export function showSearchResultsBlock(data: Array<Place>) {
   for (const key in data) {
     if (Object.prototype.hasOwnProperty.call(data, key)) {
       const el = data[key];
+      if (el === undefined) return;
 
       renderList.push(`
         <li class="result">
@@ -202,11 +212,11 @@ export function showSearchResultsBlock(data: Array<Place>) {
     `
   );
 
-  Array.from(document.querySelectorAll('.favorites')).map((el: HTMLElement) => {
+  Array.from(document.querySelectorAll('.favorites')).map((el: Element) => {
     el.addEventListener('click', (e) => toggleFavoriteItem(e));
-    checkStyleFavoriteItem(el);
+    checkStyleFavoriteItem(el as HTMLElement);
   });
-  Array.from(document.querySelector('.results-list').querySelectorAll('button')).map((el: HTMLElement) => {
-    el.addEventListener('click', (e) => renderResultReservationData(e));
+  Array.from(document.querySelector('.results-list')!.querySelectorAll('button')).map((el: HTMLElement) => {
+    el.addEventListener('click', () => renderResultReservationData());
   });
 }
