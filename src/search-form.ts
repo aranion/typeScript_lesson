@@ -32,12 +32,12 @@ export function renderSearchFormBlock(dateBegin?: string, dateFinish?: string): 
     const searchForm = document.forms.namedItem('searchForm');
     searchForm.addEventListener('change', resetForm);
 
-    enum Genre {
-      city,
-      checkin,
-      checkout,
-      price
-    }
+    // enum Genre {
+    //   city,
+    //   checkin,
+    //   checkout,
+    //   price
+    // }
 
     function search(e, fnCollBack): void {
       e.preventDefault();
@@ -51,11 +51,11 @@ export function renderSearchFormBlock(dateBegin?: string, dateFinish?: string): 
 
       const formData: FormData = new FormData(searchForm);
 
-      for (const key in Genre) {
-        if (isNaN(+key)) {
+      for (const key in data) {
+        // if (isNaN(+key)) {
           data[key] = formData.get(key);
           if (key === 'price') data[key] = +data[key];
-        }
+        // }
       }
 
       searchFormData(data);
